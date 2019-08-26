@@ -17,11 +17,11 @@ import { Button, List, Radio, Segment } from "semantic-ui-react";
 
 export default class GitLabProjects extends Component {
   state = {
-    selected_project: '',
+    selected_project: "",
     projects: []
-  }
+  };
 
-   /**
+  /**
    * Default runnable method when the component is loaded
    */
   componentDidMount() {
@@ -34,31 +34,37 @@ export default class GitLabProjects extends Component {
   getProjects() {
     axios({
       method: "get",
-      url: Config.api + "/gitlab/projects",
-    }).then(res => {
-      this.setState({ projects: res.data });
-    }).catch(e => {
-      this.setState({ projects: []})
-    });
+      url: Config.api + "/api/gitlab/projects",
+      withCredentials: true
+    })
+      .then(res => {
+        this.setState({ projects: res.data });
+      })
+      .catch(e => {
+        this.setState({ projects: [] });
+      });
   }
 
-  handleProjectClick = (project) => {
+  handleProjectClick = project => {
     this.setState({ selected_project: project.target.id });
-  }
+  };
 
   handleClick = () => {
     axios({
       method: "post",
-      url: Config.api + "/gitlab/webhook",
+      url: Config.api + "/api/gitlab/webhook",
       data: {
         project_id: this.state.selected_project
-      }
-    }).then(res => {
-      history.replace("/workflows");
-    }).catch(e => {
-      this.setState({ selected_project: '' });
+      },
+      withCredentials: true
     })
-  }
+      .then(res => {
+        history.replace("/workflows");
+      })
+      .catch(e => {
+        this.setState({ selected_project: "" });
+      });
+  };
 
   render() {
     return (
@@ -66,16 +72,27 @@ export default class GitLabProjects extends Component {
         <Header />
         <Segment basic padded>
           <List selection>
-            {this.state.projects.map((project) => {
+            {this.state.projects.map(project => {
               return (
-                     <Radio key={project.id} id={project.id} onClick={this.handleProjectClick} label={project.name}>
-                     </Radio>)
+                <Radio
+                  key={project.id}
+                  id={project.id}
+                  onClick={this.handleProjectClick}
+                  label={project.name}
+                ></Radio>
+              );
             })}
           </List>
-          <Button primary floated="right" disabled={!this.state.selected_project} onClick={this.handleClick}>
+          <Button
+            primary
+            floated="right"
+            disabled={!this.state.selected_project}
+            onClick={this.handleClick}
+          >
             Connect project
           </Button>
         </Segment>
-      </div>);
+      </div>
+    );
   }
 }
